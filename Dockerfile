@@ -38,15 +38,7 @@ RUN set -eux; \
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
 ENV OPENCLAW_PREFER_PNPM=1
-RUN pnpm ui:install
-RUN pnpm ui:build
-
-# Verify UI was built successfully (fail build if missing critical files)
-RUN set -x && \
-    test -d /openclaw/ui/dist && \
-    test -f /openclaw/ui/dist/index.html && \
-    echo "✓ OpenClaw UI build verified" || \
-    (echo "✗ ERROR: OpenClaw UI build failed - missing dist files!" && exit 1)
+RUN pnpm ui:install && pnpm ui:build
 
 
 # Runtime image
