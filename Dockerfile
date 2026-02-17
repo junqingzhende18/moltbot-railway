@@ -20,29 +20,11 @@ RUN corepack enable
 
 WORKDIR /openclaw
 
-# Automatically detect and use the latest stable OpenClaw release tag
-# Falls back to v2026.2.15 if detection fails (ensures build reliability)
+# Use latest stable OpenClaw release (pinned to avoid main branch breakage)
+# TODO: Consider implementing auto-detection once Railway build debugging is easier
 # Can be overridden by passing --build-arg OPENCLAW_GIT_REF=<tag>
-ARG OPENCLAW_GIT_REF
-RUN set -eu; \
-  if [ -z "${OPENCLAW_GIT_REF:-}" ]; then \
-    echo "🔍 Auto-detecting latest OpenClaw stable release..."; \
-    LATEST_TAG=$(git ls-remote --tags https://github.com/openclaw/openclaw.git | \
-      grep -v '\^{}' | \
-      grep 'refs/tags/v[0-9]' | \
-      sed 's|.*refs/tags/||' | \
-      sort -V | \
-      tail -1 || true); \
-    if [ -n "${LATEST_TAG}" ]; then \
-      OPENCLAW_GIT_REF="${LATEST_TAG}"; \
-      echo "✓ Auto-detected OpenClaw ${OPENCLAW_GIT_REF}"; \
-    else \
-      OPENCLAW_GIT_REF="v2026.2.15"; \
-      echo "⚠ Auto-detection failed, using fallback ${OPENCLAW_GIT_REF}"; \
-    fi; \
-  else \
-    echo "✓ Using pinned OpenClaw ${OPENCLAW_GIT_REF}"; \
-  fi; \
+ARG OPENCLAW_GIT_REF=v2026.2.15
+RUN echo "✓ Using OpenClaw ${OPENCLAW_GIT_REF}" && \
   git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
 
 # Patch: relax version requirements for packages that may reference unpublished versions.
